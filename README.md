@@ -2,6 +2,12 @@
 
 three.js是源自github的一个[开源项目](https://github.com/mrdoob/three.js)
 
+## 3D全景
+
+可以用鼠标控制camera，左右方向键用于切换3D全景图片。
+
+[room.html](https://github.com/littletobby/Three.js)
+
 ### three.js的源目录结构
 
  * build
