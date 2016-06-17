@@ -55,3 +55,51 @@ three.js是源自github的一个[开源项目](https://github.com/mrdoob/three.j
 ```javascript
  renderer.render(scene, camera);
 ```
+### 渲染循环
+渲染有两种方式：实时渲染和离线渲染 。 
+实时渲染：就是需要不停的对画面进行渲染，即使画面中什么也没有改变，也需要重新渲染。下面就是一个渲染循环： 
+```javascript
+function render() {
+ cube.rotation.x += 0.1;
+ cube.rotation.y += 0.1;
+ renderer.render(scene, camera);
+ requestAnimationFrame(render);
+}
+```
+其中一个重要的函数是requestAnimationFrame，这个函数就是让浏览器去执行一次参数中的函数，这样通过上面render中调用 requestAnimationFrame()函数，requestAnimationFrame()函数又让rander()再执行一次，就形成了我 们通常所说的游戏循环了。 
+### 在Threejs中定义一个点
+```javascript
+THREE.Vector3 = function ( x, y, z ) {
+ this.x = x || 0;
+ this.y = y || 0;
+ this.z = z || 0;
+};
+```
+如何定义一个点:
+```javascript
+var point1 = new THREE.Vecotr3(4,8,9);
+```
+也可以使用set方法:
+```javascript
+var point1 = new THREE.Vector3();
+point1.set(4,8,9);
+```
+### 画一条彩色线
+```javascript
+var geometry = new THREE.Geometry();
+var material = new THREE.LineBasicMaterial( { vertexColors: true } );
+var color1 = new THREE.Color( 0x444444 ), color2 = new THREE.Color( 0xFF0000 );
+
+var p1 = new THREE.Vector3( -100, 0, 100 );
+var p2 = new THREE.Vector3(  100, 0, -100 );
+geometry.vertices.push(p1);
+geometry.vertices.push(p2);
+geometry.colors.push( color1, color2 );
+
+var line = new THREE.Line( geometry, material, THREE.LinePieces );
+scene.add(line);
+```
+1. 首先，我们声明了一个几何体geometry，如下:
+```javascript
+var geometry = new THREE.Geometry();
+```
