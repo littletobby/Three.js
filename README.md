@@ -153,3 +153,210 @@ var line = new THREE.Line( geometry, material, THREE.LinePieces );
 scene.add(line);
 ```
 这样，场景中就会出现刚才的那条线段了。
+
+### 右手坐标系
+
+Threejs使用的是右手坐标系，这源于opengl默认情况下，也是右手坐标系。
+
+x轴正方向向右，y轴正方向向上，z轴由屏幕从里向外。 
+
+### 线条的深入理解
+
+Threejs中，一条线由点，材质和颜色组成。
+
+点由THREE.Vector3表示，Threejs中没有提供单独画点的函数，它必须被放到一个THREE.Geometry形状中，这个结构中包含一个数组vertices，这个vertices就是存放无数的点（THREE.Vector3）的数组。
+
+### 性能监视器Stats
+
+在Three.js中，性能由一个[性能监视器](https://github.com/mrdoob/stats.js)来管理可以看到。
+
+性能监视器Stats的使用
+```javascript
+function animation() {
+ renderer.render(scene, camera);
+ requestAnimationFrame(animation);
+
+ stats.update();
+}
+```
+1.new 一个stats对象，代码如下
+```javascript
+stats = new Stats();
+```
+
+2.将这个对象加入到html网页中去，代码如下
+```javascript
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+```
+
+3.调用stats.update()函数来统计时间和帧数。代码如下
+```javascript
+stats.update();
+```
+
+### 使用动画引擎Tween.js来创建动画
+
+为了使程序编写更容易一些，我们可以使用动画引擎来实现动画效果。和three.js紧密结合的动画引擎是[Tween.js](https://github.com/sole)。
+
+对于快速构件动画来说，Tween.js是一个容易上手的工具。首先，你需要引擎js文件，如下：
+```javascript
+<-script src="../js/tween.min.js" data-ke-src="../js/tween.min.js"><-/script>
+```
+第二步，就是构件一个Tween对象，对Tween进行初始化，本例的代码是:
+```javascript
+function initTween() {
+ new TWEEN.Tween( mesh.position).to( { x: -400 }, 3000 ).repeat( Infinity ).start();
+}
+```
+TWEEN.Tween的构造函数接受的是要改变属性的对象，这里传入的是mesh的位置。Tween的任何一个函数返回的都是自身，所以可以用串联的方式直接调用各个函数。
+
+to函数，接受两个参数，第一个参数是一个集合，里面存放的键值对，键x表示mesh.position的x属性，值-400表示，动画结束的时候需要移动到的位置。第二个参数，是完成动画需要的时间，这里是3000ms。
+
+repeat( Infinity )表示重复无穷次，也可以接受一个整形数值，例如5次。
+
+Start表示开始动画，默认情况下是匀速的将mesh.position.x移动到-400的位置。
+
+第三步是，需要在渲染函数中去不断的更新Tween，这样才能够让mesh.position.x移动位置:
+```javascript
+function animation()
+{
+    renderer.render(scene, camera);
+    requestAnimationFrame(animation);
+    stats.update();
+    TWEEN.update();
+}
+```
+
+### 光源基类
+
+
+在Threejs中，光源用Light表示，它是所有光源的基类。它的构造函数是：
+```javascript
+THREE.Light ( hex )
+```
+它有一个参数hex，接受一个16进制的颜色值。例如要定义一种红色的光源，我们可以这样来定义：
+```javascript
+var redLight = new THREE.Light(0xFF0000);
+```
+由基类派生出来的其他种类光源
+
+THREE.Light只是其他所有光源的基类，要让光源除了具有颜色的特性之外，我们需要其他光源。
+
+### 环境光
+
+环境光用THREE.AmbientLight来表示，它的构造函数如下所示：
+```javascript
+THREE.AmbientLight( hex )
+```
+它仍然接受一个16进制的颜色值，作为光源的颜色。环境光将照射场景中的所有物体，让物体显示出某种颜色。环境光的使用例子如下所示：
+```javascript
+var light = new THREE.AmbientLight( 0xff0000 );
+scene.add( light );
+```
+只需要将光源加入场景，场景就能够通过光源渲染出好的效果来了。
+
+### 点光源
+
+点光源用PointLight来表示，它的构造函数如下所示：
+```javascript
+PointLight( color, intensity, distance )
+```
+
+ * Color：光的颜色
+ * Intensity：光的强度，默认是1.0,就是说是100%强度的灯光，
+ * distance：光的距离，从光源所在的位置，经过distance这段距离之后，光的强度将从Intensity衰减为0。
+
+默认情况下，这个值为0.0，表示光源强度不衰减。
+
+### 聚光灯
+
+聚光灯的构造函数是：
+```javascript
+THREE.SpotLight( hex, intensity, distance, angle, exponent )
+```
+函数的参数如下所示：
+ * Hex：聚光灯发出的颜色，如0xFFFFFF
+ * Intensity：光源的强度，默认是1.0，如果为0.5，则强度是一半，意思是颜色会淡一些。和上面点光源一样。
+ * Distance：光线的强度，从最大值衰减到0，需要的距离。默认为0，表示光不衰减，如果非0，则表示从光源的位置到Distance的距离，光都在线性衰减。到离光源距离Distance时，光源强度为0.
+ * Angle：聚光灯着色的角度，用弧度作为单位，这个角度是和光源的方向形成的角度。
+ * exponent：光源模型中，衰减的一个参数，越大衰减约快。
+
+### 方向光（平行光）
+
+方向光的构造函数如下所示：
+```javascript
+THREE.DirectionalLight = function ( hex, intensity )
+```
+其参数如下：
+
+ * Hex：关系的颜色，用16进制表示
+ * Intensity：光线的强度，默认为1。因为RGB的三个值均在0~255之间，不能反映出光照的强度变化，光照越强，物体表面就更明亮。它的取值范围是0到1。如果为0，表示光线基本没什么作用，那么物体就会显示为黑色。
+
+### 纹理由图片组成
+
+在threejs中，纹理类由THREE.Texture表示，其构造函数如下所示：
+```javascript
+THREE.Texture( image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy ) {
+ var geometry = new THREE.PlaneGeometry( 500, 300, 1, 1 );
+ geometry.vertices[0].uv = new THREE.Vector2(0,0);
+ geometry.vertices[1].uv = new THREE.Vector2(2,0);
+ geometry.vertices[2].uv = new THREE.Vector2(2,2);
+ geometry.vertices[3].uv = new THREE.Vector2(0,2);
+
+ var texture = THREE.ImageUtils.loadTexture("textures/a.jpg",null,function(t) {});
+ var material = new THREE.MeshBasicMaterial({map:texture});
+ var mesh = new THREE.Mesh( geometry,material );
+ scene.add( mesh );
+```
+
+### 画一个平面
+
+通过PlaneGemotry可以画一个平面，代码如下：
+```javascript
+var geometry = new THREE.PlaneGeometry( 500, 300, 1, 1 );
+```
+这个平面的宽度是500，高度是300.
+
+### 为平面赋予纹理坐标
+
+平面有4个顶点，所以我们只需要指定4个纹理坐标就行了。纹理坐标由顶点的uv成员来表示，uv被定义为一个二维向量THREE.Vector2()，我们可以通过如下代码来为平面定义纹理：
+```javascript
+geometry.vertices[0].uv = new THREE.Vector2(0,0);
+geometry.vertices[1].uv = new THREE.Vector2(1,0);
+geometry.vertices[2].uv = new THREE.Vector2(1,1);
+geometry.vertices[3].uv = new THREE.Vector2(0,1);
+```
+
+注意，4个顶点分别对应了纹理的4个顶点。还要注意（0,0），（1,0），（1,1），（0,1）他们之间的顺序是逆时针方向。
+
+### 加载纹理
+
+这里加载纹理使用了loadTexture函数，代码如下：
+```javascript
+var texture = THREE.ImageUtils.loadTexture("textures/a.jpg",null,function(t) {});
+```
+
+这个函数的第一个参数是一个相对路径，表示与您的网页之间的相对路径。相对路径对应了一个纹理图片textures/a.jpg。
+
+第二个参数为null，表示时候要传入一个纹理坐标参数，来覆盖前面在geometry中的参数。
+
+第三个表示一个回调函数，表示成功加载纹理后需要执行的函数，参数t是传入的texture。
+
+最后，这个函数的返回值是加载的纹理。
+
+### 将纹理应用于材质
+
+加载好纹理之后只需要将纹理映射到材质就可以了。我们这里使用了一个普通的材质THREE.MeshBasicMaterial，材质中有一个map属性，可以直接接受纹理，我们可以这样定义一个带纹理的材质：
+```javascript
+var material = new THREE.MeshBasicMaterial({map:texture});
+```
+将纹理和geometry，用于Mesh：
+```javascript
+var mesh = new THREE.Mesh( geometry,material );
+```
+将这个mesh加入场景中：
+```javascript
+scene.add( mesh );
+```
