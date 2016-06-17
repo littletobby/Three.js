@@ -16,10 +16,10 @@ three.js是源自github的一个[开源项目](https://github.com/mrdoob/three.j
 
 ### 配置开发环境
 
-浏览器 Chrome
+##### 浏览器 Chrome
 
-开发工具 WebStorm
+#####开发工具 WebStorm
 
-调试工具 Chrome
+#####调试工具 Chrome
 
-调试技巧 Developer tools -> Source 单机代码行的数字即可添加断点
+######调试技巧 Developer tools -> Source 单机代码行的数字即可添加断点
